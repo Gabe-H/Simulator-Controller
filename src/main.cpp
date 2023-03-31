@@ -13,6 +13,7 @@
  */
 
 #include <Adafruit_NeoPixel.h>
+#include <SimulatorHub.h>
 
 #define LED_PIN 6
 // #define LED_PIN 3
@@ -20,43 +21,16 @@
 
 #define LED_BLINK_INTERVAL 750 // ms
 
-enum FlyPTcommands
-{
-  FLYPT_CMD = '$',
-  FLYPT_END = '!',
-  FLYPT_START = 'S',
-  FLYPT_STOP = 'E',
-  FLYPT_FRAME = 'F',
-  FLYPT_AXIS = 'A',
-};
-
-enum HubStates
-{
-  BOOT = 0,
-  IDLE = 1,
-  RUNNING = 2,
-};
-
-class MotorValues
-{
-public:
-  uint16_t rawBytes[6] = {0, 0, 0, 0, 0, 0}; // 0-65535
-  float position[6] = {0, 0, 0, 0, 0, 0};    // -40 to 40
-};
-
 // Use neopixels to represent motor values, for now
 Adafruit_NeoPixel pixels(NUM_PIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
-MotorValues motors;
-HubStates hubState = BOOT;
+HubStates hubState;
+SimulatorHub hub;
 
 unsigned long lastLedUpdate = 0;
 bool blinkState = false;
 
 bool gotCmd = false;
 
-void processIncomingData();
-void parseMotorValues();
-void updateMotors();
 void updateLeds();
 
 void setup()
@@ -64,118 +38,15 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(115200);
   pixels.begin();
+
+  hub.setup();
 }
 
 void loop()
 {
   // put your main code here, to run repeatedly:
-  processIncomingData();
+  hubState = hub.loop();
   updateLeds();
-}
-
-void processIncomingData()
-{
-  /**
-   * All commands are prefixed with a '$' character
-   *
-   * Frames are sent beginning with a 'F' character, followed by
-   * an integer representing the motor number. The next 2 bytes
-   * are the position of the motor (unsigned 16-bit integer, little
-   * endian). The frame is closed with a '!' character.
-   *
-   * Example frame:
-   *  $ F 1 \x01 \x23 2 \x04 \x56 3 \x08 \x79 4 \x0C \x9A 5 \x0E \xBC 6 \x10 \xDE !
-   *
-   * Each frame is 21 bytes long.
-   */
-  // Read the incoming data
-  while (Serial.available() > 0)
-  {
-    char c = Serial.read();
-    switch (c)
-    {
-    case FLYPT_CMD:
-      // Next character is the command
-      gotCmd = true;
-      break;
-    case FLYPT_START:
-      // Start the motors
-      if (!gotCmd)
-        break;
-
-      hubState = IDLE;
-
-      gotCmd = false;
-      break;
-
-    case FLYPT_STOP:
-      // Stop the motors
-      if (!gotCmd)
-        break;
-
-      hubState = IDLE;
-
-      gotCmd = false;
-      break;
-
-    case FLYPT_FRAME:
-      // Read the next x bytes and parse them as motor values
-      if (!gotCmd)
-        break;
-
-      hubState = RUNNING;
-      parseMotorValues();
-
-      gotCmd = false;
-      break;
-
-    default:
-      // Ignore the character
-      gotCmd = false;
-      break;
-    }
-  }
-}
-
-void waitForBuffer(int size)
-{
-  while (Serial.available() < size)
-    ;
-}
-
-void parseMotorValues()
-{
-  uint8_t motorNum = 0;
-
-  while (true)
-  {
-    waitForBuffer(1); // 1 byte for motor number
-
-    char c = Serial.read();
-    if (c == FLYPT_END)
-    {
-      // We're done reading the motor values
-      updateMotors();
-      break;
-    }
-
-    waitForBuffer(2); // Motor value is 2 bytes
-
-    // The next character is the motor number (char starts at 1, motor starts at 0);
-    motorNum = c - '1';
-
-    // The next 2 bytes are the motor value
-    byte msb = Serial.read();
-    byte lsb = Serial.read();
-
-    // Combine the bytes into a single value
-    int motorValue = (msb << 8) | lsb;
-
-    motors.rawBytes[motorNum] = motorValue;
-
-    // Convert the motor value to a float between -40 and 40
-    motors.position[motorNum] = ((80.0 / 65535.0) * float(motorValue)) - 40.0;
-  }
 }
 
 void updateLeds()
@@ -216,9 +87,4 @@ void updateLeds()
   }
 
   pixels.show();
-}
-
-void updateMotors()
-{
-  // TODO
 }
