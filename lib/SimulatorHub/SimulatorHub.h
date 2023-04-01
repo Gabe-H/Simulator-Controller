@@ -12,11 +12,10 @@
 
 #define BAUD_RATE_IN 115200
 #define BAUD_RATE_OUT 115200
-
 #define FRAME_SIZE 30
+
 #define REST_HEIGHT 34.0
 #define SCALING_CONSTANT ((REST_HEIGHT * 2) / 65535.0)
-// #define SCALING_CONSTANT (1)
 
 #define NUM_MOTORS 6
 
@@ -32,8 +31,8 @@
 class MotorValues
 {
 public:
-    uint16_t rawBytes[6] = {0, 0, 0, 0, 0, 0}; // 0-65535
-    float position[6] = {0, 0, 0, 0, 0, 0};    // -40 to 40
+    uint16_t rawBytes[NUM_MOTORS] = {0, 0, 0, 0, 0, 0}; // 0-65535
+    float position[NUM_MOTORS] = {0, 0, 0, 0, 0, 0};    // -REST_HEIGHT to REST_HEIGHT
 };
 
 class SimulatorHub
@@ -49,12 +48,15 @@ public:
     void parseMotorValues();
     void updateMotors();
 
+    void stopSimulator();
+    void startSimulator();
+
     MotorValues motors;
 
 private:
     void waitForBuffer(uint8_t numBytes);
 
-    HubStates state = BOOT;
+    HubStates state = IDLE;
     bool gotCmd1 = false;
     bool gotCmd2 = false;
 

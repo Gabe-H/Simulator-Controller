@@ -12,10 +12,10 @@ enum FlyPTcommands
 
 enum HubStates
 {
-    BOOT = 0,
     IDLE = 1,
     RUNNING = 2,
     STARTING = 3,
+    STOPPED = 4,
 };
 
 #endif // SIMULATORSTATES_H

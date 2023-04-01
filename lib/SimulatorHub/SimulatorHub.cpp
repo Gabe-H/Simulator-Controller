@@ -23,6 +23,9 @@ void SimulatorHub::setup()
 
 HubStates SimulatorHub::loop()
 {
+    if (state == IDLE)
+        return state;
+
     return processIncomingData();
 }
 
@@ -65,7 +68,7 @@ HubStates SimulatorHub::processIncomingData()
 
             case FLYPT_STOP:
                 // TODO: Stop the motors
-                state = IDLE;
+                state = STOPPED;
                 break;
 
             case FLYPT_FRAME:
@@ -136,7 +139,7 @@ void SimulatorHub::parseMotorValues()
 void SimulatorHub::updateMotors()
 {
     char frame[FRAME_SIZE];
-    const char *fmt = "q 0 %.2f\rq 1 %.2f\r"; // Carriage return for easier debugging
+    const char *fmt = "q 0 %.2f q 1 %.2f\r"; // Carriage return for easier debugging
     // const char *fmt = "q 0 %.2f\nq 1 %.2f\n"; // Use this for actual ODrives
 
     // ODrive 0 => Motors 6, 1
@@ -160,4 +163,43 @@ void SimulatorHub::waitForBuffer(uint8_t numBytes)
 {
     while (Serial.available() < numBytes)
         ;
+}
+
+void SimulatorHub::stopSimulator()
+{
+    state = IDLE;
+
+    delay(1000);
+
+    // Move all motors to rest position
+    const char *restCmdFmt = "q 0 %.2f 5 q 1 %.2f 5\r";
+    // const char *restCmdFmt = "q 0 %.2f 5\nq 1 %.2f 5\n";
+    // TODO: investigate using trajector control for smoother operation
+
+    char restCmd[FRAME_SIZE];
+
+    sprintf(restCmd, restCmdFmt, REST_HEIGHT * -1, REST_HEIGHT * -1);
+
+    odrv0.print(restCmd);
+    // odrv1.print(restCmd);
+    // odrv2.print(restCmd);
+}
+
+void SimulatorHub::startSimulator()
+{
+    state = IDLE;
+
+    // Move all motors to neutral position
+    const char *zeroCmd = "q 0 0 5 q 1 0 5\r";
+    // const char *zeroCmd = "q 0 0 5\nq 1 0 5\n";
+
+    // TODO: investigate using trajector control for smoother operation
+
+    odrv0.print(zeroCmd);
+    // odrv1.print(zeroCmd);
+    // odrv2.print(zeroCmd);
+
+    // TODO: Wait for motors to reach neutral position
+
+    state = STARTING;
 }
