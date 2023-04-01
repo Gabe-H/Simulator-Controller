@@ -136,7 +136,8 @@ void SimulatorHub::parseMotorValues()
 void SimulatorHub::updateMotors()
 {
     char frame[FRAME_SIZE];
-    const char *fmt = "q 0 %.2f\rq 1 %.2f\r";
+    const char *fmt = "q 0 %.2f\rq 1 %.2f\r"; // Carriage return for easier debugging
+    // const char *fmt = "q 0 %.2f\nq 1 %.2f\n"; // Use this for actual ODrives
 
     // ODrive 0 => Motors 6, 1
     sprintf(frame, fmt, motors.position[DRIVE_0_AXIS_0], motors.position[DRIVE_0_AXIS_1]);
