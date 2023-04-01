@@ -13,7 +13,20 @@
 #define BAUD_RATE_IN 115200
 #define BAUD_RATE_OUT 115200
 
+#define FRAME_SIZE 30
+#define SCALING_CONSTANT (68.0 / 65535.0)
+// #define SCALING_CONSTANT (1)
+
 #define NUM_MOTORS 6
+
+// Motor mapping. Value is the motor number on the Stewart Platform
+// according to FlyPT.
+#define DRIVE_0_AXIS_0 5
+#define DRIVE_0_AXIS_1 0
+#define DRIVE_1_AXIS_0 1
+#define DRIVE_1_AXIS_1 2
+#define DRIVE_2_AXIS_0 3
+#define DRIVE_2_AXIS_1 4
 
 class MotorValues
 {
@@ -25,7 +38,7 @@ public:
 class SimulatorHub
 {
 public:
-    SimulatorHub();
+    SimulatorHub(HardwareSerial &odrv0serial);
     ~SimulatorHub();
 
     void setup();
@@ -39,8 +52,9 @@ public:
 
 private:
     void waitForBuffer(uint8_t numBytes);
-
     bool gotCmd = false;
+    HubStates state = BOOT;
+    HardwareSerial &odrv0;
 };
 
 #endif // SIMULATORHUB_H

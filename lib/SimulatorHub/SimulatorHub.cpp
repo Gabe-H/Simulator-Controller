@@ -1,6 +1,6 @@
 #include "SimulatorHub.h"
 
-SimulatorHub::SimulatorHub()
+SimulatorHub::SimulatorHub(HardwareSerial &odrv0serial) : odrv0(odrv0serial)
 {
 }
 
@@ -10,7 +10,7 @@ SimulatorHub::~SimulatorHub()
 
 void SimulatorHub::setup()
 {
-    Serial.begin(BAUD_RATE_IN);
+    odrv0.begin(BAUD_RATE_OUT);
 
     for (int i = 0; i < NUM_MOTORS; i++)
     {
@@ -21,11 +21,7 @@ void SimulatorHub::setup()
 
 HubStates SimulatorHub::loop()
 {
-    HubStates state = processIncomingData();
-    parseMotorValues();
-    updateMotors();
-
-    return state;
+    return processIncomingData();
 }
 
 HubStates SimulatorHub::processIncomingData()
@@ -44,7 +40,6 @@ HubStates SimulatorHub::processIncomingData()
      * Each frame is 21 bytes long.
      */
 
-    HubStates state;
     // Read the incoming data
     while (Serial.available() > 0)
     {
@@ -81,11 +76,15 @@ HubStates SimulatorHub::processIncomingData()
             gotCmd = retain; // If we're retaining the command, keep it true
         }
         else if (c == FLYPT_CMD)
+        {
             // Next character is the command
             gotCmd = true;
+        }
         else
+        {
             // Ignore the character
             gotCmd = false;
+        }
     }
 
     return state;
@@ -121,13 +120,36 @@ void SimulatorHub::parseMotorValues()
 
         motors.rawBytes[motorNum] = motorValue;
 
-        // Convert the motor value to a float between -40 and 40
-        motors.position[motorNum] = ((0.0012207) * float(motorValue)) - 40.0;
+        // Convert the motor value to a float between -34 and 34
+        motors.position[motorNum] = (SCALING_CONSTANT * float(motorValue)) - 34;
     }
 }
 
 void SimulatorHub::updateMotors()
 {
+    /* Send the motor values at a time to their ODrive
+     * Example frame:
+     * q 0 <uin16_t>\n
+     * q 1 <uin16_t>\n
+     */
+    char frame[FRAME_SIZE];
+    const char *fmt = "q 0 %.2f\rq 1 %.2f\r";
+
+    // ODrive 0 => 6, 1
+    sprintf(frame, fmt, motors.position[DRIVE_0_AXIS_0], motors.position[DRIVE_0_AXIS_1]);
+    odrv0.print(frame);
+
+    // ODrive 1 => 2, 3
+    sprintf(frame, fmt, motors.position[DRIVE_1_AXIS_0], motors.position[DRIVE_1_AXIS_1]);
+    // odrv1.print(frame);
+    odrv0.print(frame);
+
+    // ODrive 2 => 4, 5
+    sprintf(frame, fmt, motors.position[DRIVE_2_AXIS_0], motors.position[DRIVE_2_AXIS_1]);
+    // odrv2.print(frame);
+    odrv0.print(frame);
+
+    odrv0.flush();
 }
 
 void SimulatorHub::waitForBuffer(uint8_t numBytes)
