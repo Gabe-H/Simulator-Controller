@@ -54,7 +54,8 @@ private:
     void waitForBuffer(uint8_t numBytes);
 
     HubStates state = BOOT;
-    bool gotCmd = false;
+    bool gotCmd1 = false;
+    bool gotCmd2 = false;
 
     HardwareSerial &odrv0;
 

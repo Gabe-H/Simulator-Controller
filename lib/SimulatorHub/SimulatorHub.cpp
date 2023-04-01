@@ -44,15 +44,18 @@ HubStates SimulatorHub::processIncomingData()
     while (Serial.available() > 0)
     {
         char c = Serial.read();
-        if (gotCmd)
+        if (c == FLYPT_CMD)
         {
-            bool retain = false;
+            // Next character is the command
+            if (gotCmd1)
+                gotCmd2 = true;
+            else
+                gotCmd1 = true;
+        }
+        else if (gotCmd2)
+        {
             switch (c)
             {
-            case FLYPT_CMD:
-                // Next character is the command
-                retain = true;
-                break;
             case FLYPT_START:
                 // TODO: Start the motors
                 state = STARTING;
@@ -73,17 +76,14 @@ HubStates SimulatorHub::processIncomingData()
                 // Ignore the character
                 break;
             }
-            gotCmd = retain; // If we're retaining the command, keep it true
-        }
-        else if (c == FLYPT_CMD)
-        {
-            // Next character is the command
-            gotCmd = true;
+            gotCmd1 = false; // Reset the command booleans
+            gotCmd2 = false;
         }
         else
         {
             // Ignore the character
-            gotCmd = false;
+            gotCmd2 = false;
+            gotCmd1 = false;
         }
     }
 

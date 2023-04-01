@@ -3,12 +3,11 @@
 
 enum FlyPTcommands
 {
-    FLYPT_CMD = '$',
+    FLYPT_CMD = 0xFF,
     FLYPT_END = '!',
     FLYPT_START = 'S',
     FLYPT_STOP = 'E',
     FLYPT_FRAME = 'F',
-    FLYPT_AXIS = 'A',
 };
 
 enum HubStates
