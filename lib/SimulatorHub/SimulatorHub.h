@@ -39,7 +39,7 @@ class SimulatorHub
 {
 public:
     SimulatorHub(HardwareSerial &odrv0serial);
-    ~SimulatorHub();
+    // SimulatorHub(HardwareSerial &odrv0serial, HardwareSerial &odrv1serial, HardwareSerial &odrv2serial);
 
     void setup();
     HubStates loop();
@@ -52,9 +52,15 @@ public:
 
 private:
     void waitForBuffer(uint8_t numBytes);
-    bool gotCmd = false;
+
     HubStates state = BOOT;
+    bool gotCmd = false;
+
     HardwareSerial &odrv0;
+
+    // HardwareSerial &odrv0;
+    // HardwareSerial &odrv1;
+    // HardwareSerial &odrv2;
 };
 
 #endif // SIMULATORHUB_H

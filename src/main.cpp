@@ -12,20 +12,19 @@
  **************
  */
 
-#include <Adafruit_NeoPixel.h>
 #include <SimulatorHub.h>
 
-#define LED_PIN 6
-// #define LED_PIN 3
-#define NUM_PIXELS 6
-#define LED 4
+#define LED_PIN 4
 
 #define LED_BLINK_INTERVAL 750 // ms
 
-// Use neopixels to represent motor values, for now
-// Adafruit_NeoPixel pixels(NUM_PIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
 HardwareSerial odrv0(1);
 SimulatorHub hub(odrv0);
+
+// HardwareSerial odrv0(1);
+// HardwareSerial odrv1(2);
+// HardwareSerial odrv2(3);
+// SimulatorHub hub(odrv0, odrv1, odrv2);
 
 HubStates hubState;
 unsigned long lastLedUpdate = 0;
@@ -33,13 +32,12 @@ bool blinkState = false;
 
 bool gotCmd = false;
 
-// void updateLeds();
-
 void setup()
 {
-  // put your setup code here, to run once:
   Serial.begin(115200);
-  pinMode(LED, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+
+  // Setup ODrive serial port
   hub.setup();
 }
 
@@ -48,7 +46,7 @@ unsigned long timer = 0;
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
+  // Process incoming data and send to ODrives
   hubState = hub.processIncomingData();
 
   if (hubState == STARTING)
@@ -56,15 +54,14 @@ void loop()
     odrv0.println("Starting...");
   }
 
+  // Status LED
   if (hubState == RUNNING)
-  {
-    digitalWrite(LED, HIGH);
-  }
+    digitalWrite(LED_PIN, HIGH);
   else
-  {
-    digitalWrite(LED, LOW);
-  }
+    digitalWrite(LED_PIN, LOW);
 
+  // Print loop count every second to determine
+  // what interval loops we can run
   if ((millis() - timer) >= 1000)
   {
     odrv0.print("\nLoop count: ");
@@ -77,47 +74,4 @@ void loop()
   {
     loopCount++;
   }
-  // updateLeds();
 }
-
-/*
-void updateLeds()
-{
-  switch (hubState)
-  {
-  case BOOT:
-    pixels.clear();
-    break;
-  case RUNNING:
-    for (int i = 0; i < 6; i++)
-    {
-      pixels.setPixelColor(i, pixels.Color((blinkState) ? 100 : 0, 0, 0));
-      blinkState = !blinkState;
-    }
-    break;
-  case IDLE:
-  {
-    if (blinkState)
-    {
-      for (int i = 0; i < NUM_PIXELS; i++)
-      {
-        pixels.setPixelColor(i, pixels.Color(20, 80, 0));
-      }
-    }
-    else
-    {
-      pixels.clear();
-    }
-
-    if ((millis() - lastLedUpdate) >= LED_BLINK_INTERVAL)
-    {
-      blinkState = !blinkState;
-      lastLedUpdate = millis();
-    }
-    break;
-  }
-  }
-
-  pixels.show();
-}
-*/

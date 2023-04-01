@@ -4,9 +4,9 @@ SimulatorHub::SimulatorHub(HardwareSerial &odrv0serial) : odrv0(odrv0serial)
 {
 }
 
-SimulatorHub::~SimulatorHub()
-{
-}
+// SimulatorHub::SimulatorHub(HardwareSerial &odrv0serial, HardwareSerial &odrv1serial, HardwareSerial &odrv2serial) : odrv0(odrv0serial), odrv1(odrv1serial), odrv2(odrv2serial)
+// {
+// }
 
 void SimulatorHub::setup()
 {
@@ -125,13 +125,13 @@ void SimulatorHub::parseMotorValues()
     }
 }
 
+/* Send the motor values at a time to their ODrive
+ * Example frame:
+ * q 0 <uin16_t>\n
+ * q 1 <uin16_t>\n
+ */
 void SimulatorHub::updateMotors()
 {
-    /* Send the motor values at a time to their ODrive
-     * Example frame:
-     * q 0 <uin16_t>\n
-     * q 1 <uin16_t>\n
-     */
     char frame[FRAME_SIZE];
     const char *fmt = "q 0 %.2f\rq 1 %.2f\r";
 
