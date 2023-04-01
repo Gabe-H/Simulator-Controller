@@ -11,6 +11,8 @@ SimulatorHub::SimulatorHub(HardwareSerial &odrv0serial) : odrv0(odrv0serial)
 void SimulatorHub::setup()
 {
     odrv0.begin(BAUD_RATE_OUT);
+    // odrv1.begin(BAUD_RATE_OUT);
+    // odrv2.begin(BAUD_RATE_OUT);
 
     for (int i = 0; i < NUM_MOTORS; i++)
     {
@@ -27,7 +29,7 @@ HubStates SimulatorHub::loop()
 HubStates SimulatorHub::processIncomingData()
 {
     /**
-     * All commands are prefixed with a '$' character
+     * All commands are prefixed with two 0xFF characters
      *
      * Frames are sent beginning with a 'F' character, followed by
      * an integer representing the motor number. The next 2 bytes
@@ -35,13 +37,13 @@ HubStates SimulatorHub::processIncomingData()
      * endian). The frame is closed with a '!' character.
      *
      * Example frame:
-     *  $ F 1 \x01 \x23 2 \x04 \x56 3 \x08 \x79 4 \x0C \x9A 5 \x0E \xBC 6 \x10 \xDE !
+     *  $ \xFF \xFF 1 \x01 \x23 2 \x04 \x56 3 \x08 \x79 4 \x0C \x9A 5 \x0E \xBC 6 \x10 \xDE !
      *
      * Each frame is 21 bytes long.
      */
 
     // Read the incoming data
-    while (Serial.available() > 0)
+    if (Serial.available() > 0)
     {
         char c = Serial.read();
         if (c == FLYPT_CMD)
@@ -96,32 +98,33 @@ void SimulatorHub::parseMotorValues()
 
     while (true)
     {
-        waitForBuffer(1); // 1 byte for motor number
+        waitForBuffer(1); // 1 byte for motor number or end of frame
 
         char c = Serial.read();
+
+        // First, check if the frame is complete
         if (c == FLYPT_END)
         {
-            // We're done reading the motor values
+            // Frame is done. Update motors
             updateMotors();
             break;
         }
 
-        waitForBuffer(2); // Motor value is 2 bytes
-
-        // The next character is the motor number (char starts at 1, motor starts at 0);
+        // The character is the motor number
+        // Note: char starts at 1, motor ndx starts at 0
         motorNum = c - '1';
 
-        // The next 2 bytes are the motor value
-        byte msb = Serial.read();
-        byte lsb = Serial.read();
+        waitForBuffer(2); // Motor value is unsigned 16-bit integer
 
-        // Combine the bytes into a single value
-        int motorValue = (msb << 8) | lsb;
+        byte msb = Serial.read(); // Most significant byte
+        byte lsb = Serial.read(); // Least significant byte
 
-        motors.rawBytes[motorNum] = motorValue;
+        uint16_t motorValue = (msb << 8) | lsb; // Combine the bytes uint16_t
 
-        // Convert the motor value to a float between -34 and 34
-        motors.position[motorNum] = (SCALING_CONSTANT * float(motorValue)) - 34;
+        motors.rawBytes[motorNum] = motorValue; // Store the raw bytes (for debugging)
+
+        // Convert the motor value to a float between +/- REST_HEIGHT (34.0)
+        motors.position[motorNum] = (SCALING_CONSTANT * float(motorValue)) - REST_HEIGHT;
     }
 }
 
@@ -135,21 +138,21 @@ void SimulatorHub::updateMotors()
     char frame[FRAME_SIZE];
     const char *fmt = "q 0 %.2f\rq 1 %.2f\r";
 
-    // ODrive 0 => 6, 1
+    // ODrive 0 => Motors 6, 1
     sprintf(frame, fmt, motors.position[DRIVE_0_AXIS_0], motors.position[DRIVE_0_AXIS_1]);
     odrv0.print(frame);
 
-    // ODrive 1 => 2, 3
+    // ODrive 1 => Motors 2, 3
     sprintf(frame, fmt, motors.position[DRIVE_1_AXIS_0], motors.position[DRIVE_1_AXIS_1]);
     // odrv1.print(frame);
     odrv0.print(frame);
 
-    // ODrive 2 => 4, 5
+    // ODrive 2 => Motors 4, 5
     sprintf(frame, fmt, motors.position[DRIVE_2_AXIS_0], motors.position[DRIVE_2_AXIS_1]);
     // odrv2.print(frame);
     odrv0.print(frame);
 
-    odrv0.flush();
+    // odrv0.flush(); // Clear outgoing buffer
 }
 
 void SimulatorHub::waitForBuffer(uint8_t numBytes)

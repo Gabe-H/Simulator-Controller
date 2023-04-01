@@ -225,18 +225,18 @@
         <item>SOURCE :: LOOP</item>
         <item>SOURCE :: LOOP (1)</item>
       </TVInputSelection>
-      <pnlPitch.hsPitchInOut>0;3.70549234380935E-322</pnlPitch.hsPitchInOut>
-      <pnlRoll.hsRollInOut>0;3.70549234380935E-322</pnlRoll.hsRollInOut>
-      <pnlYaw.hsYawInOut>0;-3.70549234380935E-322</pnlYaw.hsYawInOut>
-      <pnlHeave.hsHeaveInOut>29.1557760000513;7.00441811235397</pnlHeave.hsHeaveInOut>
-      <pnlSurge.hsSurgeInOut>0;3.70549234380935E-322</pnlSurge.hsSurgeInOut>
-      <pnlSway.hsSwayInOut>0;3.70549234380935E-322</pnlSway.hsSwayInOut>
+      <pnlPitch.hsPitchInOut>0;0</pnlPitch.hsPitchInOut>
+      <pnlRoll.hsRollInOut>0;1.78494783782515E-82</pnlRoll.hsRollInOut>
+      <pnlYaw.hsYawInOut>0;0</pnlYaw.hsYawInOut>
+      <pnlHeave.hsHeaveInOut>0;2.70499413156045E-22</pnlHeave.hsHeaveInOut>
+      <pnlSurge.hsSurgeInOut>0;0</pnlSurge.hsSurgeInOut>
+      <pnlSway.hsSwayInOut>0;0</pnlSway.hsSwayInOut>
     </CONTROLS>
   </POSE>
   <RIG>
     <Type>Mover.Rigs.LinearHexapod</Type>
     <Name>RIG :: LINEAR HEXAPOD</Name>
-    <Location>752,376</Location>
+    <Location>988,357</Location>
     <Size>1352,608</Size>
     <Visible>False</Visible>
     <CONTROLS>
@@ -309,12 +309,12 @@
       <TVInputSelection>
         <item>POSE :: FROM MOTION</item>
       </TVInputSelection>
-      <PNLActuatorsOutput.slider0>-0.00145419706996108;-0.00145419706996108</PNLActuatorsOutput.slider0>
-      <PNLActuatorsOutput.slider1>0.00145419805335223;0.00145419805335223</PNLActuatorsOutput.slider1>
-      <PNLActuatorsOutput.slider2>-0.00145419707109795;-0.00145419707109795</PNLActuatorsOutput.slider2>
-      <PNLActuatorsOutput.slider3>0.0014541980544891;0.0014541980544891</PNLActuatorsOutput.slider3>
-      <PNLActuatorsOutput.slider4>-0.00145419707109795;-0.00145419707109795</PNLActuatorsOutput.slider4>
-      <PNLActuatorsOutput.slider5>0.0014541980544891;0.0014541980544891</PNLActuatorsOutput.slider5>
+      <PNLActuatorsOutput.slider0>0;0</PNLActuatorsOutput.slider0>
+      <PNLActuatorsOutput.slider1>0;0</PNLActuatorsOutput.slider1>
+      <PNLActuatorsOutput.slider2>0;0</PNLActuatorsOutput.slider2>
+      <PNLActuatorsOutput.slider3>0;0</PNLActuatorsOutput.slider3>
+      <PNLActuatorsOutput.slider4>0;0</PNLActuatorsOutput.slider4>
+      <PNLActuatorsOutput.slider5>0;0</PNLActuatorsOutput.slider5>
     </CONTROLS>
   </RIG>
   <OUTPUT>
@@ -327,9 +327,9 @@
       <NUDInterval>5</NUDInterval>
       <NUDStartTime>500</NUDStartTime>
       <NUDStopTime>10</NUDStopTime>
-      <TXTStopString>$E</TXTStopString>
-      <TXTSendString>$F1&lt;Axis1a&gt;2&lt;Axis2a&gt;3&lt;Axis3a&gt;4&lt;Axis4a&gt;5&lt;Axis5a&gt;6&lt;Axis6a&gt;!</TXTSendString>
-      <TXTStartString>$S</TXTStartString>
+      <TXTStopString>&lt;255&gt;&lt;255&gt;E</TXTStopString>
+      <TXTSendString>&lt;255&gt;&lt;255&gt;F1&lt;Axis1a&gt;2&lt;Axis2a&gt;3&lt;Axis3a&gt;4&lt;Axis4a&gt;5&lt;Axis5a&gt;6&lt;Axis6a&gt;!</TXTSendString>
+      <TXTStartString>&lt;255&gt;&lt;255&gt;S</TXTStartString>
       <TXTUniqueName>14</TXTUniqueName>
       <TXTInputString></TXTInputString>
       <TXTName>OUTPUT :: SERIAL (3)</TXTName>
@@ -367,10 +367,10 @@
     <item>16</item>
     <item>22</item>
     <item>18</item>
-    <item>4</item>
     <item>20</item>
-    <item>7</item>
     <item>13</item>
+    <item>4</item>
+    <item>7</item>
     <item>14</item>
     <item>9</item>
   </Z_ORDER>
