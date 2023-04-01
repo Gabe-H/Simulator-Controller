@@ -21,12 +21,18 @@ void SimulatorHub::setup()
     }
 }
 
-HubStates SimulatorHub::loop()
+// Return true if the state has changed
+bool SimulatorHub::loop()
 {
-    if (state == IDLE)
-        return state;
+    processIncomingData();
 
-    return processIncomingData();
+    if (state != oldState)
+    {
+        oldState = state;
+        return true;
+    }
+
+    return false;
 }
 
 HubStates SimulatorHub::processIncomingData()
@@ -173,6 +179,8 @@ void SimulatorHub::stopSimulator()
 
     // Move all motors to rest position
     const char *restCmdFmt = "q 0 %.2f 5 q 1 %.2f 5\r";
+    odrv0.println(); // New line for easier debugging
+
     // const char *restCmdFmt = "q 0 %.2f 5\nq 1 %.2f 5\n";
     // TODO: investigate using trajector control for smoother operation
 
@@ -187,12 +195,11 @@ void SimulatorHub::stopSimulator()
 
 void SimulatorHub::startSimulator()
 {
-    state = IDLE;
-
     // Move all motors to neutral position
     const char *zeroCmd = "q 0 0 5 q 1 0 5\r";
-    // const char *zeroCmd = "q 0 0 5\nq 1 0 5\n";
+    odrv0.println(); // New line for easier debugging
 
+    // const char *zeroCmd = "q 0 0 5\nq 1 0 5\n";
     // TODO: investigate using trajector control for smoother operation
 
     odrv0.print(zeroCmd);
@@ -201,5 +208,5 @@ void SimulatorHub::startSimulator()
 
     // TODO: Wait for motors to reach neutral position
 
-    state = STARTING;
+    state = READY;
 }

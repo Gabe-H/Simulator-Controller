@@ -12,10 +12,11 @@ enum FlyPTcommands
 
 enum HubStates
 {
-    IDLE = 1,
-    RUNNING = 2,
-    STARTING = 3,
-    STOPPED = 4,
+    IDLE = 1,     // Simulator lowered, ready for rider to get on
+    RUNNING = 2,  // Data is being sent from FlyPT
+    STARTING = 3, // FlyPT sent start command
+    STOPPED = 4,  // FlyPT sent stop command
+    READY = 5,    // Start button pressed, simulator ready at 0
 };
 
 #endif // SIMULATORSTATES_H

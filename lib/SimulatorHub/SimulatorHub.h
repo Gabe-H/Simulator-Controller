@@ -42,7 +42,9 @@ public:
     // SimulatorHub(HardwareSerial &odrv0serial, HardwareSerial &odrv1serial, HardwareSerial &odrv2serial);
 
     void setup();
-    HubStates loop();
+    bool loop();
+
+    HubStates getState() { return state; }
 
     HubStates processIncomingData();
     void parseMotorValues();
@@ -57,6 +59,7 @@ private:
     void waitForBuffer(uint8_t numBytes);
 
     HubStates state = IDLE;
+    HubStates oldState;
     bool gotCmd1 = false;
     bool gotCmd2 = false;
 

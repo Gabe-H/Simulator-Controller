@@ -86,10 +86,10 @@ void setup()
 void loop()
 {
   // Process incoming data and send to ODrives
-  HubStates hubState = hub.loop();
-
-  // Handle state changes (not really implemented yet)
-  handleState(hubState);
+  if (hub.loop())
+  {
+    handleState(hub.getState());
+  }
 
   // Handle button presses
   if (startButton.handle())
@@ -104,7 +104,7 @@ void loop()
   /* Print loop count every second to determine
    * how fast we can run FlyPT
    * [DON'T USE WITH REAL ODRIVES]
-   *
+   * /
   if ((millis() - timer) >= 1000)
   {
     odrv0.print("\nLoop count: ");
@@ -117,7 +117,7 @@ void loop()
   {
     loopCount++;
   }
-  ***********************/
+  /***********************/
 }
 
 void handleState(HubStates state)
@@ -127,13 +127,17 @@ void handleState(HubStates state)
   case STARTING:
     odrv0.println("Starting...");
     break;
-
-  // Placeholders
   case RUNNING:
+    odrv0.println("Running...");
     break;
   case STOPPED:
+    odrv0.println("FlyPT stopped");
+    break;
+  case READY:
+    odrv0.println("Ready for FlyPT");
     break;
   case IDLE:
+    odrv0.println("Idle");
     break;
   }
 }
