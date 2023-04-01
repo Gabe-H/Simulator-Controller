@@ -37,9 +37,9 @@ HubStates SimulatorHub::processIncomingData()
      * endian). The frame is closed with a '!' character.
      *
      * Example frame:
-     *  $ \xFF \xFF 1 \x01 \x23 2 \x04 \x56 3 \x08 \x79 4 \x0C \x9A 5 \x0E \xBC 6 \x10 \xDE !
+     *  $ \xFF \xFF F 1 \x01 \x23 2 \x04 \x56 3 \x08 \x79 4 \x0C \x9A 5 \x0E \xBC 6 \x10 \xDE !
      *
-     * Each frame is 21 bytes long.
+     * Each frame is 22 bytes long.
      */
 
     // Read the incoming data
