@@ -23,7 +23,7 @@ public:
   Button(int pin)
   {
     this->pin = pin;
-    pinMode(pin, INPUT_PULLUP);
+    // pinMode(pin, INPUT_PULLUP);
   }
 
   // Returns true when the button was pressed
@@ -80,9 +80,6 @@ void setup()
   Serial.begin(115200);
   odrv0.begin(115200);
 
-  pinMode(START_BUTTON, INPUT_PULLUP);
-  pinMode(START_BUTTON, INPUT_PULLUP);
-
   // Setup ODrive serial ports
   hub.setup();
 }
@@ -96,14 +93,14 @@ void loop()
   }
 
   // Handle button presses
-  if (startButton.handle())
-  {
-    hub.startSimulator();
-  }
-  else if (stopButton.handle())
-  {
-    hub.stopSimulator();
-  }
+  // if (startButton.handle())
+  // {
+  //   hub.startSimulator();
+  // }
+  // else if (stopButton.handle())
+  // {
+  //   hub.stopSimulator();
+  // }
 
   /* Print loop count every second to determine
    * how fast we can run FlyPT

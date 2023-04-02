@@ -4,6 +4,7 @@
 enum FlyPTcommands
 {
     FLYPT_CMD = 0xFF,
+    // FLYPT_CMD = '$',
     FLYPT_END = '!',
     FLYPT_START = 'S',
     FLYPT_STOP = 'E',
