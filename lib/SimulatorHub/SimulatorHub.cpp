@@ -1,6 +1,6 @@
 #include "SimulatorHub.h"
 
-SimulatorHub::SimulatorHub(HardwareSerial &odrv0serial) : odrv0(odrv0serial)
+SimulatorHub::SimulatorHub(Stream &odrv0serial) : odrv0(odrv0serial)
 {
 }
 
@@ -10,10 +10,6 @@ SimulatorHub::SimulatorHub(HardwareSerial &odrv0serial) : odrv0(odrv0serial)
 
 void SimulatorHub::setup()
 {
-    odrv0.begin(BAUD_RATE_OUT);
-    // odrv1.begin(BAUD_RATE_OUT);
-    // odrv2.begin(BAUD_RATE_OUT);
-
     for (int i = 0; i < NUM_MOTORS; i++)
     {
         motors.rawBytes[i] = 0;

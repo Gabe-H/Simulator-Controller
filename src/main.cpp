@@ -59,13 +59,16 @@ private:
 Button startButton(START_BUTTON);
 Button stopButton(STOP_BUTTON);
 
-HardwareSerial odrv0(1);
-SimulatorHub hub(odrv0);
+#ifdef PICO_RP2040
 
-// HardwareSerial odrv0(1);
-// HardwareSerial odrv1(2);
-// HardwareSerial odrv2(3);
-// SimulatorHub hub(odrv0, odrv1, odrv2);
+#define odrv0 Serial1
+
+#else
+
+HardwareSerial odrv0(1);
+
+#endif
+SimulatorHub hub(odrv0);
 
 unsigned long loopCount = 0;
 unsigned long timer = 0;
@@ -75,6 +78,7 @@ void handleState(HubStates state);
 void setup()
 {
   Serial.begin(115200);
+  odrv0.begin(115200);
 
   pinMode(START_BUTTON, INPUT_PULLUP);
   pinMode(START_BUTTON, INPUT_PULLUP);

@@ -10,8 +10,6 @@
 #include <Arduino.h>
 #include <SimulatorStates.h>
 
-#define BAUD_RATE_IN 115200
-#define BAUD_RATE_OUT 115200
 #define FRAME_SIZE 30
 
 #define REST_HEIGHT 34.0
@@ -38,7 +36,7 @@ public:
 class SimulatorHub
 {
 public:
-    SimulatorHub(HardwareSerial &odrv0serial);
+    SimulatorHub(Stream &odrv0serial);
     // SimulatorHub(HardwareSerial &odrv0serial, HardwareSerial &odrv1serial, HardwareSerial &odrv2serial);
 
     void setup();
@@ -63,7 +61,7 @@ private:
     bool gotCmd1 = false;
     bool gotCmd2 = false;
 
-    HardwareSerial &odrv0;
+    Stream &odrv0;
 
     // HardwareSerial &odrv0;
     // HardwareSerial &odrv1;
