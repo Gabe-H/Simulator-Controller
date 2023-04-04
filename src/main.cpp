@@ -33,6 +33,10 @@ void handleState(HubStates state);
 
 void setup()
 {
+  Serial.begin(115200);
+  odrv0.begin(115200);
+
+  // Setup ODrive serial ports
   Serial.begin(BAUD_RATE);
   odrv0.begin(BAUD_RATE);
   odrv1.begin(BAUD_RATE);
