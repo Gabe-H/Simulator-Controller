@@ -26,6 +26,9 @@
 #define odrv1 Serial2
 #define odrv2 Serial3
 
+// #define DEBUG(x) (Serial1.println(x))
+#define DEBUG(x) (x)
+
 #define BAUD_RATE 115200
 
 SimulatorHub hub(odrv0, odrv1, odrv2);
@@ -59,14 +62,11 @@ void loop()
   }
 
   // Handle button presses
-  if (startButton.handle())
-  {
-    hub.startSimulator(); // Reset position to 0, then start data stream
-  }
   if (stopButton.handle())
-  {
     hub.stopSimulator(); // Stop data stream, move position down for rider to get off
-  }
+
+  else if (startButton.handle())
+    hub.startSimulator(); // Reset position to 0, then start data stream
 
   // Handle state changes
   if (hub.stateChange())
@@ -88,33 +88,33 @@ void handleState(HubStates state)
     // Set fast blink rate (don't see this much)
     led.setDelay(100);
     led.setMode(LED_BLINK);
-    odrv0.println("Starting...");
+    DEBUG("Starting...");
     break;
 
   case RUNNING:
     // Led off during operation
     led.setMode(LED_OFF);
-    odrv0.println("Running...");
+    DEBUG("Running...");
     break;
 
   case STOPPED:
     // Set slow blink rate
     led.setDelay(1000);
     led.setMode(LED_BLINK);
-    odrv0.println("FlyPT stopped");
+    DEBUG("FlyPT stopped");
     break;
 
   case READY:
     // Medium blink rate for ready
     led.setDelay(350);
     led.setMode(LED_BLINK);
-    odrv0.println("Ready for FlyPT");
+    DEBUG("Ready for FlyPT");
     break;
 
   case IDLE:
     // Led solid on when idle
     led.setMode(LED_ON);
-    odrv0.println("Idle");
+    DEBUG("Idle");
     break;
   }
 }
