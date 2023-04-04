@@ -65,12 +65,12 @@ bool SimulatorHub::processIncomingData()
             switch (c)
             {
             case FLYPT_START:
-                // TODO: Start the motors
+                // For implementation if needed
                 state = STARTING;
                 break;
 
             case FLYPT_STOP:
-                // TODO: Stop the motors
+                // For implementation if needed
                 state = STOPPED;
                 break;
 
@@ -123,11 +123,11 @@ void SimulatorHub::parseMotorValues()
 
         motors.rawBytes[motorNum] = motorValue; // Store the raw bytes (for debugging)
 
-        // Convert the motor value to a float between +/- REST_HEIGHT (34.0)
-        motors.position[motorNum] = (SCALING_CONSTANT * float(motorValue)) - REST_HEIGHT;
+        // Convert the motor value to a float between +/- RESET_HEIGHT (34.0)
+        motors.position[motorNum] = (SCALING_CONSTANT * float(motorValue)) - RESET_HEIGHT;
 
-        // TODO: Check values? I'm not sure if we need to though since the defines are constants
-        // and the max/min values of the uint16 are
+        /** TODO: Verify values? I'm not sure if we need to though since the defines are constants
+        and the max/min values are known to be within the range of the uint16_t */
 
         // Check next byte to see if it's the end of the frame before moving on
         if (Serial.peek() == FLYPT_END_FRAME)
@@ -186,17 +186,17 @@ void SimulatorHub::stopSimulator()
     delay(1000);
 
     // Move all motors to rest position (NOTE NEGATIVE SIGN)
-    const char *restCmdFmt = "q 0 -%u 5 q 1 -%u 5\r";
+    const char *restCmdFmt = "q 0 -%u %u q 1 -%u %u\r";
     odrv0.println(); // New line for easier debugging
     odrv1.println(); // New line for easier debugging
     odrv2.println(); // New line for easier debugging
 
-    // const char *restCmdFmt = "q 0 -%u 5\nq 1 -%u 5\n";
-    // TODO: investigate using trajector control for smoother operation
+    // const char *restCmdFmt = "q 0 -%u %u\nq 1 -%u %u\n";
+    /** TODO: investigate using trajectory control for smoother operation */
 
     char restCmd[FRAME_SIZE];
 
-    sprintf(restCmd, restCmdFmt, int(REST_HEIGHT), int(REST_HEIGHT));
+    sprintf(restCmd, restCmdFmt, int(RESET_HEIGHT), RESET_SPEED, int(RESET_HEIGHT), RESET_SPEED);
 
     odrv0.print(restCmd);
     odrv1.print(restCmd);
@@ -206,19 +206,23 @@ void SimulatorHub::stopSimulator()
 void SimulatorHub::startSimulator()
 {
     // Move all motors to neutral position
-    const char *zeroCmd = "q 0 0 5 q 1 0 5\r";
+    const char *zeroCmdFmt = "q 0 0 %u q 1 0 %u\r";
     odrv0.println(); // New line for easier debugging
     odrv1.println(); // New line for easier debugging
     odrv2.println(); // New line for easier debugging
 
-    // const char *zeroCmd = "q 0 0 5\nq 1 0 5\n";
-    // TODO: investigate using trajector control for smoother operation
+    // const char *zeroCmd = "q 0 0 %u\nq 1 0 %u\n";
+    /** TODO: investigate using trajector control for smoother operation */
+
+    char zeroCmd[FRAME_SIZE];
+
+    sprintf(zeroCmd, zeroCmdFmt, RESET_SPEED, RESET_SPEED);
 
     odrv0.print(zeroCmd);
     odrv1.print(zeroCmd);
     odrv2.print(zeroCmd);
 
-    // TODO: Wait for motors to reach neutral position
+    /** TODO: Wait for motors to reach neutral position */
 
     state = READY;
 }

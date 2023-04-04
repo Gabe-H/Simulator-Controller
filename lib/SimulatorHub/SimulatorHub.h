@@ -12,8 +12,10 @@
 
 #define FRAME_SIZE 30
 
-#define REST_HEIGHT 34.0
-#define SCALING_CONSTANT ((REST_HEIGHT * 2) / 65535.0)
+#define RESET_HEIGHT 34.0
+#define SCALING_CONSTANT ((RESET_HEIGHT * 2) / 65535.0)
+
+#define RESET_SPEED 1 // 1 rev/s
 
 #define NUM_MOTORS 6
 
@@ -30,7 +32,7 @@ class MotorValues
 {
 public:
     uint16_t rawBytes[NUM_MOTORS] = {0, 0, 0, 0, 0, 0}; // 0-65535
-    float position[NUM_MOTORS] = {0, 0, 0, 0, 0, 0};    // -REST_HEIGHT to REST_HEIGHT
+    float position[NUM_MOTORS] = {0, 0, 0, 0, 0, 0};    // -RESET_HEIGHT to RESET_HEIGHT
 };
 
 class SimulatorHub
