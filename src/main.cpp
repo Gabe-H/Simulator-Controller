@@ -59,6 +59,13 @@ void loop()
     // Reset position to 0, then start data stream
     hub.startSimulator();
   }
+
+  /*************************************************************
+   * !! TODO: Prevent data from starting again!!
+   * Current implementation stops data briefly, but then starts again
+   * on the next frame. Need to ignore FLY_PT_START command when stopped.
+   *************************************************************/
+
   if (stopButton.handle())
   {
     // Stop data stream, move position down for rider to get off
@@ -69,7 +76,7 @@ void loop()
   if (hub.stateChange())
     handleState(hub.getState());
 
-  delayMicroseconds(500); // Breathing room for serial ports
+  delayMicroseconds(1000); // Breathing room ( bogging at 500us, okay at 750us. Playing safe with 1ms)
 }
 
 void handleState(HubStates state)
