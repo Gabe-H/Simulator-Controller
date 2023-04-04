@@ -26,8 +26,8 @@
 #define odrv1 Serial2
 #define odrv2 Serial3
 
-// #define DEBUG(x) (Serial1.println(x))
-#define DEBUG(x) (x)
+#define DEBUG(x) (odrv0.println(x))
+// #define DEBUG(x) (x)
 
 #define BAUD_RATE 115200
 
