@@ -65,13 +65,15 @@ bool SimulatorHub::processIncomingData()
             switch (c)
             {
             case FLYPT_START:
-                // For implementation if needed
                 state = STARTING;
                 break;
 
             case FLYPT_STOP:
-                // For implementation if needed
-                state = STOPPED;
+                // If output is disabled, set to IDLE instead of STOPPED
+                if (!sendOutput)
+                    state = IDLE;
+                else
+                    state = STOPPED;
                 break;
 
             case FLYPT_FRAME:

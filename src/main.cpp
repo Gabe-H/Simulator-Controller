@@ -15,26 +15,15 @@
 #include <SimulatorHub.h>
 #include <Button.h>
 #include <StatusPin.h>
+#include "config.h"
 
-// Pin definitions
-#define START_BUTTON 11
-#define STOP_BUTTON 12
-#define LED 13
-
-// Serial port definitions
-#define odrv0 Serial1
-#define odrv1 Serial2
-#define odrv2 Serial3
-
-#define DEBUG(x) (odrv0.println(x))
-// #define DEBUG(x) (x)
-
-#define BAUD_RATE 115200
+// #define DEBUG(x) (odrv0.println(x))
+#define DEBUG(x)
 
 SimulatorHub hub(odrv0, odrv1, odrv2);
 Button startButton(START_BUTTON);
 Button stopButton(STOP_BUTTON);
-StatusPin led(LED); // Led for now, will be bigger light on control panel later
+StatusPin led(STATUS_PIN); // Led for now, will be bigger light on control panel later
 
 // State change handler fnct. declaration
 void handleState(HubStates state);
