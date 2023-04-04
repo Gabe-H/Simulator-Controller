@@ -36,15 +36,15 @@ public:
 class SimulatorHub
 {
 public:
-    SimulatorHub(Stream &odrv0serial);
-    // SimulatorHub(HardwareSerial &odrv0serial, HardwareSerial &odrv1serial, HardwareSerial &odrv2serial);
+    SimulatorHub(Stream &odrv0serial, Stream &odrv1serial, Stream &odrv2serial);
 
     void setup();
     bool loop();
 
     HubStates getState() { return state; }
+    bool stateChange();
 
-    HubStates processIncomingData();
+    bool processIncomingData();
     void parseMotorValues();
     void updateMotors();
 
@@ -62,10 +62,8 @@ private:
     bool gotCmd2 = false;
 
     Stream &odrv0;
-
-    // HardwareSerial &odrv0;
-    // HardwareSerial &odrv1;
-    // HardwareSerial &odrv2;
+    Stream &odrv1;
+    Stream &odrv2;
 };
 
 #endif // SIMULATORHUB_H

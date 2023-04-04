@@ -8,124 +8,69 @@
  * controllers via UART.
  *
  * Input ranges: 0-65535 (16-bit unsigned integer)
- * Motor output: -40 to 40 (float)
+ * Motor output: -34 to 34 (float)
  **************
  */
 
 #include <SimulatorHub.h>
+#include <Button.h>
 
-#define START_BUTTON 14
+#define START_BUTTON 11
 #define STOP_BUTTON 12
 
-class Button
-{
-public:
-  Button(int pin)
-  {
-    this->pin = pin;
-    pinMode(pin, INPUT_PULLUP);
-  }
+#define odrv0 Serial1
+#define odrv1 Serial2
+#define odrv2 Serial3
 
-  // Returns true when the button was pressed
-  bool handle()
-  {
-    int state = digitalRead(pin);
+#define BAUD_RATE 115200
 
-    // Button is pressed
-    if (state == LOW && oldState == HIGH)
-    {
-      // Catch bouncing
-      if ((millis() - lastDebounceTime) < debounce)
-        return false;
-
-      oldState = state;
-      lastDebounceTime = millis();
-      return true;
-    }
-    else
-    {
-      oldState = state;
-      return false;
-    }
-  }
-
-private:
-  int pin;
-  int oldState = HIGH;
-  unsigned long debounce = 100; // ms
-  unsigned long lastDebounceTime = 0;
-};
+SimulatorHub hub(odrv0, odrv1, odrv2);
 
 Button startButton(START_BUTTON);
 Button stopButton(STOP_BUTTON);
-
-#ifdef PICO_RP2040
-
-#define odrv0 Serial1
-
-#else
-
-HardwareSerial odrv0(1);
-
-#endif
-SimulatorHub hub(odrv0);
-
-unsigned long loopCount = 0;
-unsigned long timer = 0;
 
 void handleState(HubStates state);
 
 void setup()
 {
-  Serial.begin(115200);
-  odrv0.begin(115200);
+  Serial.begin(BAUD_RATE);
+  odrv0.begin(BAUD_RATE);
+  odrv1.begin(BAUD_RATE);
+  odrv2.begin(BAUD_RATE);
 
-  pinMode(START_BUTTON, INPUT_PULLUP);
-  pinMode(START_BUTTON, INPUT_PULLUP);
-
-  // Setup ODrive serial ports
+  // Initialize hub (doesn't do much now, but there if needed)
   hub.setup();
 }
 
 void loop()
 {
   // Process incoming data and send to ODrives
-  if (hub.loop())
-  {
-    handleState(hub.getState());
+  if (hub.processIncomingData())
+  { /* Data was received from FlyPT */
   }
 
   // Handle button presses
   if (startButton.handle())
   {
+    // Reset position to 0, then start data stream
     hub.startSimulator();
   }
-  else if (stopButton.handle())
+  if (stopButton.handle())
   {
+    // Stop data stream, move position down for rider to get off
     hub.stopSimulator();
   }
 
-  /* Print loop count every second to determine
-   * how fast we can run FlyPT
-   * [DON'T USE WITH REAL ODRIVES]
-   * /
-  if ((millis() - timer) >= 1000)
-  {
-    odrv0.print("\nLoop count: ");
-    odrv0.println(loopCount);
-    odrv0.println();
-    loopCount = 0;
-    timer = millis();
-  }
-  else
-  {
-    loopCount++;
-  }
-  /***********************/
+  // Handle state changes
+  if (hub.stateChange())
+    handleState(hub.getState());
+
+  delayMicroseconds(500); // Breathing room for serial ports
 }
 
 void handleState(HubStates state)
 {
+  // These are only called once, when the state changes
   switch (state)
   {
   case STARTING:

@@ -1,12 +1,8 @@
 #include "SimulatorHub.h"
 
-SimulatorHub::SimulatorHub(Stream &odrv0serial) : odrv0(odrv0serial)
+SimulatorHub::SimulatorHub(Stream &odrv0serial, Stream &odrv1serial, Stream &odrv2serial) : odrv0(odrv0serial), odrv1(odrv1serial), odrv2(odrv2serial)
 {
 }
-
-// SimulatorHub::SimulatorHub(HardwareSerial &odrv0serial, HardwareSerial &odrv1serial, HardwareSerial &odrv2serial) : odrv0(odrv0serial), odrv1(odrv1serial), odrv2(odrv2serial)
-// {
-// }
 
 void SimulatorHub::setup()
 {
@@ -20,8 +16,11 @@ void SimulatorHub::setup()
 // Return true if the state has changed
 bool SimulatorHub::loop()
 {
-    processIncomingData();
+    return processIncomingData();
+}
 
+bool SimulatorHub::stateChange()
+{
     if (state != oldState)
     {
         oldState = state;
@@ -31,7 +30,7 @@ bool SimulatorHub::loop()
     return false;
 }
 
-HubStates SimulatorHub::processIncomingData()
+bool SimulatorHub::processIncomingData()
 {
     /**
      * All commands are prefixed with two 0xFF characters
@@ -42,15 +41,17 @@ HubStates SimulatorHub::processIncomingData()
      * endian). The frame is closed with a '!' character.
      *
      * Example frame:
-     *  $ \xFF \xFF F 1 \x01 \x23 2 \x04 \x56 3 \x08 \x79 4 \x0C \x9A 5 \x0E \xBC 6 \x10 \xDE !
+     *  $ \xFF \xFF 'F' '1' \xXX \xXX '2' \xXX \xXX '3' \xXX \xXX '4' \xXX \xXX '5' \xXX \xXX '6' \xXX \xXX !
      *
      * Each frame is 22 bytes long.
      */
 
+    bool running = false;
+
     // Read the incoming data
     if (Serial.available() > 0)
     {
-        char c = Serial.read();
+        byte c = Serial.read();
         if (c == FLYPT_CMD)
         {
             // Next character is the command
@@ -77,6 +78,7 @@ HubStates SimulatorHub::processIncomingData()
                 // Read the next x bytes and parse them as motor values
                 state = RUNNING;
                 parseMotorValues();
+                running = true;
                 break;
 
             default:
@@ -94,26 +96,19 @@ HubStates SimulatorHub::processIncomingData()
         }
     }
 
-    return state;
+    return running;
 }
 
 void SimulatorHub::parseMotorValues()
 {
     uint8_t motorNum = 0;
 
-    while (true)
+    // Run maximum of 6 times (one for each motor)
+    for (int i = 0; i < NUM_MOTORS; i++)
     {
         waitForBuffer(1); // 1 byte for motor number or end of frame
 
         char c = Serial.read();
-
-        // First, check if the frame is complete
-        if (c == FLYPT_END)
-        {
-            // Frame is done. Update motors
-            updateMotors();
-            break;
-        }
 
         // The character is the motor number
         // Note: char starts at 1, motor ndx starts at 0
@@ -124,12 +119,24 @@ void SimulatorHub::parseMotorValues()
         byte msb = Serial.read(); // Most significant byte
         byte lsb = Serial.read(); // Least significant byte
 
-        uint16_t motorValue = (msb << 8) | lsb; // Combine the bytes uint16_t
+        uint16_t motorValue = (msb << 8) | lsb; // Combine the bytes to uint16_t
 
         motors.rawBytes[motorNum] = motorValue; // Store the raw bytes (for debugging)
 
         // Convert the motor value to a float between +/- REST_HEIGHT (34.0)
         motors.position[motorNum] = (SCALING_CONSTANT * float(motorValue)) - REST_HEIGHT;
+
+        // TODO: Check values? I'm not sure if we need to though since the defines are constants
+        // and the max/min values of the uint16 are
+
+        // Check next byte to see if it's the end of the frame before moving on
+        if (Serial.peek() == FLYPT_END_FRAME)
+        {
+            // Frame is done. Update motors
+            updateMotors();
+            break;
+        }
+        // Else keep reading values
     }
 }
 
@@ -141,24 +148,29 @@ void SimulatorHub::parseMotorValues()
 void SimulatorHub::updateMotors()
 {
     char frame[FRAME_SIZE];
-    const char *fmt = "q 0 %.2f q 1 %.2f\r"; // Carriage return for easier debugging
-    // const char *fmt = "q 0 %.2f\nq 1 %.2f\n"; // Use this for actual ODrives
+    const char *fmt = "q 0 %s q 1 %s\r"; // Carriage return for easier debugging
+    // const char *fmt = "q 0 %s\nq 1 %s\n"; // Use this for actual ODrives
+
+    char motor0[20];
+    char motor1[20];
 
     // ODrive 0 => Motors 6, 1
-    sprintf(frame, fmt, motors.position[DRIVE_0_AXIS_0], motors.position[DRIVE_0_AXIS_1]);
+    dtostrf(motors.position[DRIVE_0_AXIS_0], 0, 2, motor0); // 0: minumum string length, 2: number of decimal places
+    dtostrf(motors.position[DRIVE_0_AXIS_1], 0, 2, motor1);
+    sprintf(frame, fmt, motor0, motor1);
     odrv0.print(frame);
 
     // ODrive 1 => Motors 2, 3
-    sprintf(frame, fmt, motors.position[DRIVE_1_AXIS_0], motors.position[DRIVE_1_AXIS_1]);
-    // odrv1.print(frame);
-    odrv0.print(frame);
+    dtostrf(motors.position[DRIVE_1_AXIS_0], 0, 2, motor0);
+    dtostrf(motors.position[DRIVE_1_AXIS_1], 0, 2, motor1);
+    sprintf(frame, fmt, motor0, motor1);
+    odrv1.print(frame);
 
     // ODrive 2 => Motors 4, 5
-    sprintf(frame, fmt, motors.position[DRIVE_2_AXIS_0], motors.position[DRIVE_2_AXIS_1]);
-    // odrv2.print(frame);
-    odrv0.print(frame);
-
-    // odrv0.flush(); // Clear outgoing buffer
+    dtostrf(motors.position[DRIVE_2_AXIS_0], 0, 2, motor0);
+    dtostrf(motors.position[DRIVE_2_AXIS_1], 0, 2, motor1);
+    sprintf(frame, fmt, motor0, motor1);
+    odrv2.print(frame);
 }
 
 void SimulatorHub::waitForBuffer(uint8_t numBytes)
@@ -173,20 +185,22 @@ void SimulatorHub::stopSimulator()
 
     delay(1000);
 
-    // Move all motors to rest position
-    const char *restCmdFmt = "q 0 %.2f 5 q 1 %.2f 5\r";
+    // Move all motors to rest position (NOTE NEGATIVE SIGN)
+    const char *restCmdFmt = "q 0 -%u 5 q 1 -%u 5\r";
     odrv0.println(); // New line for easier debugging
+    odrv1.println(); // New line for easier debugging
+    odrv2.println(); // New line for easier debugging
 
-    // const char *restCmdFmt = "q 0 %.2f 5\nq 1 %.2f 5\n";
+    // const char *restCmdFmt = "q 0 -%u 5\nq 1 -%u 5\n";
     // TODO: investigate using trajector control for smoother operation
 
     char restCmd[FRAME_SIZE];
 
-    sprintf(restCmd, restCmdFmt, REST_HEIGHT * -1, REST_HEIGHT * -1);
+    sprintf(restCmd, restCmdFmt, int(REST_HEIGHT), int(REST_HEIGHT));
 
     odrv0.print(restCmd);
-    // odrv1.print(restCmd);
-    // odrv2.print(restCmd);
+    odrv1.print(restCmd);
+    odrv2.print(restCmd);
 }
 
 void SimulatorHub::startSimulator()
@@ -194,13 +208,15 @@ void SimulatorHub::startSimulator()
     // Move all motors to neutral position
     const char *zeroCmd = "q 0 0 5 q 1 0 5\r";
     odrv0.println(); // New line for easier debugging
+    odrv1.println(); // New line for easier debugging
+    odrv2.println(); // New line for easier debugging
 
     // const char *zeroCmd = "q 0 0 5\nq 1 0 5\n";
     // TODO: investigate using trajector control for smoother operation
 
     odrv0.print(zeroCmd);
-    // odrv1.print(zeroCmd);
-    // odrv2.print(zeroCmd);
+    odrv1.print(zeroCmd);
+    odrv2.print(zeroCmd);
 
     // TODO: Wait for motors to reach neutral position
 
