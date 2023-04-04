@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <FLYPT_MOVER Version="3.5.3">
   <MAIN>
-    <Location>-688,223</Location>
+    <Location>972,222</Location>
   </MAIN>
   <SHARE>
     <ShareUser></ShareUser>
@@ -163,7 +163,7 @@
   <POSE>
     <Type>Mover.Poses.AdvancedPoseFromMotion</Type>
     <Name>POSE :: FROM MOTION</Name>
-    <Location>95,146</Location>
+    <Location>134,257</Location>
     <Size>1344,500</Size>
     <Visible>False</Visible>
     <CONTROLS>
@@ -221,7 +221,11 @@
       <pnlHeave.ddlHeaveValue>Vertical acceleration (m/s²)</pnlHeave.ddlHeaveValue>
       <pnlSurge.ddlSurgeValue>Longitudinal acceleration (m/s²)</pnlSurge.ddlSurgeValue>
       <pnlSway.ddlSwayValue>Lateral acceleration (m/s²)</pnlSway.ddlSwayValue>
-      <TVInputSelection />
+      <TVInputSelection>
+        <item>SOURCE :: LOOP</item>
+        <item>SOURCE :: LOOP (1)</item>
+        <item>SOURCE :: NOISE</item>
+      </TVInputSelection>
       <pnlPitch.hsPitchInOut>0;0</pnlPitch.hsPitchInOut>
       <pnlRoll.hsRollInOut>0;0</pnlRoll.hsRollInOut>
       <pnlYaw.hsYawInOut>0;0</pnlYaw.hsYawInOut>
@@ -317,12 +321,12 @@
   <OUTPUT>
     <Type>Mover.Outputs.Serial</Type>
     <Name>OUTPUT :: SERIAL (3)</Name>
-    <Location>-1521,502</Location>
+    <Location>875,403</Location>
     <Size>870,420</Size>
     <Visible>False</Visible>
     <CONTROLS>
-      <NUDInterval>3</NUDInterval>
-      <NUDStartTime>0</NUDStartTime>
+      <NUDInterval>5</NUDInterval>
+      <NUDStartTime>100</NUDStartTime>
       <NUDStopTime>10</NUDStopTime>
       <TXTStopString>&lt;255&gt;&lt;255&gt;E</TXTStopString>
       <TXTSendString>&lt;255&gt;&lt;255&gt;F1&lt;Axis1a&gt;2&lt;Axis2a&gt;3&lt;Axis3a&gt;4&lt;Axis4a&gt;5&lt;Axis5a&gt;6&lt;Axis6a&gt;!</TXTSendString>
@@ -338,7 +342,7 @@
       <DDLStopBits>1</DDLStopBits>
       <DDLDataBits>8</DDLDataBits>
       <DDLBaudRate>115200</DDLBaudRate>
-      <DDLPort>COM8</DDLPort>
+      <DDLPort>COM12</DDLPort>
       <DDLTypeOfOutput>Binary</DDLTypeOfOutput>
       <TVInputSelection />
     </CONTROLS>
@@ -346,7 +350,7 @@
   <VIEWER_3D>
     <Type>Mover.Viewers.View3D</Type>
     <Name>3D VIEWER</Name>
-    <Location>-749,534</Location>
+    <Location>0,534</Location>
     <Size>400,400</Size>
     <Visible>False</Visible>
     <CONTROLS>
@@ -364,10 +368,10 @@
     <item>13</item>
     <item>16</item>
     <item>18</item>
-    <item>20</item>
     <item>22</item>
     <item>7</item>
     <item>4</item>
+    <item>20</item>
     <item>14</item>
     <item>9</item>
   </Z_ORDER>
