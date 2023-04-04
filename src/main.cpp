@@ -14,10 +14,14 @@
 
 #include <SimulatorHub.h>
 #include <Button.h>
+#include <StatusPin.h>
 
+// Pin definitions
 #define START_BUTTON 11
 #define STOP_BUTTON 12
+#define LED 13
 
+// Serial port definitions
 #define odrv0 Serial1
 #define odrv1 Serial2
 #define odrv2 Serial3
@@ -25,22 +29,23 @@
 #define BAUD_RATE 115200
 
 SimulatorHub hub(odrv0, odrv1, odrv2);
-
 Button startButton(START_BUTTON);
 Button stopButton(STOP_BUTTON);
+StatusPin led(LED); // Led for now, will be bigger light on control panel later
 
+// State change handler fnct. declaration
 void handleState(HubStates state);
 
 void setup()
 {
-  Serial.begin(115200);
-  odrv0.begin(115200);
-
   // Setup ODrive serial ports
   Serial.begin(BAUD_RATE);
   odrv0.begin(BAUD_RATE);
   odrv1.begin(BAUD_RATE);
   odrv2.begin(BAUD_RATE);
+
+  // Init led pin
+  led.setup();
 
   // Initialize hub (doesn't do much now, but there if needed)
   hub.setup();
@@ -56,27 +61,22 @@ void loop()
   // Handle button presses
   if (startButton.handle())
   {
-    // Reset position to 0, then start data stream
-    hub.startSimulator();
+    hub.startSimulator(); // Reset position to 0, then start data stream
   }
-
-  /*************************************************************
-   * !! TODO: Prevent data from starting again!!
-   * Current implementation stops data briefly, but then starts again
-   * on the next frame. Need to ignore FLY_PT_START command when stopped.
-   *************************************************************/
-
   if (stopButton.handle())
   {
-    // Stop data stream, move position down for rider to get off
-    hub.stopSimulator();
+    hub.stopSimulator(); // Stop data stream, move position down for rider to get off
   }
 
   // Handle state changes
   if (hub.stateChange())
     handleState(hub.getState());
 
-  delayMicroseconds(1000); // Breathing room ( bogging at 500us, okay at 750us. Playing safe with 1ms)
+  // Handle led/light
+  led.loop();
+
+  // Breathing room (bogging at 500us, okay at 750us. Playing safe with 1ms)
+  delayMicroseconds(1000);
 }
 
 void handleState(HubStates state)
@@ -85,18 +85,35 @@ void handleState(HubStates state)
   switch (state)
   {
   case STARTING:
+    // Set fast blink rate (don't see this much)
+    led.setDelay(100);
+    led.setMode(LED_BLINK);
     odrv0.println("Starting...");
     break;
+
   case RUNNING:
+    // Led off during operation
+    led.setMode(LED_OFF);
     odrv0.println("Running...");
     break;
+
   case STOPPED:
+    // Set slow blink rate
+    led.setDelay(1000);
+    led.setMode(LED_BLINK);
     odrv0.println("FlyPT stopped");
     break;
+
   case READY:
+    // Medium blink rate for ready
+    led.setDelay(350);
+    led.setMode(LED_BLINK);
     odrv0.println("Ready for FlyPT");
     break;
+
   case IDLE:
+    // Led solid on when idle
+    led.setMode(LED_ON);
     odrv0.println("Idle");
     break;
   }

@@ -186,9 +186,7 @@ void SimulatorHub::stopSimulator()
 {
     state = IDLE;
 
-    delay(1000);
-
-    // Move all motors to rest position (NOTE NEGATIVE SIGN)
+    // Move all motors to rest position (NOTE: NEGATIVE SIGN)
     const char *restCmdFmt = "q 0 -%u %u q 1 -%u %u\r";
     odrv0.println(); // New line for easier debugging
     odrv1.println(); // New line for easier debugging
