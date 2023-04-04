@@ -76,6 +76,9 @@ bool SimulatorHub::processIncomingData()
 
             case FLYPT_FRAME:
                 // Read the next x bytes and parse them as motor values
+                if (!sendOutput) // Disable if stopped
+                    break;
+
                 state = RUNNING;
                 parseMotorValues();
                 running = true;
@@ -201,12 +204,14 @@ void SimulatorHub::stopSimulator()
     odrv0.print(restCmd);
     odrv1.print(restCmd);
     odrv2.print(restCmd);
+
+    setOutput(false); // Stop data flow
 }
 
 void SimulatorHub::startSimulator()
 {
     // Move all motors to neutral position
-    const char *zeroCmdFmt = "q 0 0 %u q 1 0 %u\r";
+    const char *zeroCmdFmt = "q 0 0 %u q 1 0 %u\r\n";
     odrv0.println(); // New line for easier debugging
     odrv1.println(); // New line for easier debugging
     odrv2.println(); // New line for easier debugging
@@ -225,4 +230,6 @@ void SimulatorHub::startSimulator()
     /** TODO: Wait for motors to reach neutral position */
 
     state = READY;
+
+    setOutput(true); // Start data flow
 }

@@ -46,6 +46,8 @@ public:
     HubStates getState() { return state; }
     bool stateChange();
 
+    void setOutput(bool send) { sendOutput = send; }
+
     bool processIncomingData();
     void parseMotorValues();
     void updateMotors();
@@ -62,6 +64,8 @@ private:
     HubStates oldState;
     bool gotCmd1 = false;
     bool gotCmd2 = false;
+
+    bool sendOutput = false;
 
     Stream &odrv0;
     Stream &odrv1;
