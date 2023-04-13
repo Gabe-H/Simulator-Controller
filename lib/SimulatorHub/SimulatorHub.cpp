@@ -153,8 +153,11 @@ void SimulatorHub::parseMotorValues()
 void SimulatorHub::updateMotors()
 {
     char frame[FRAME_SIZE];
-    const char *fmt = "q 0 %s q 1 %s\r"; // Carriage return for easier debugging
-    // const char *fmt = "q 0 %s\nq 1 %s\n"; // Use this for actual ODrives
+#ifdef DEBUG
+    const char *fmt = "q 0 %s q 1 %s\r";
+#else
+    const char *fmt = "q 0 %s\nq 1 %s\n";
+#endif
 
     char motor0[20];
     char motor1[20];
@@ -189,12 +192,12 @@ void SimulatorHub::stopSimulator()
     state = IDLE;
 
     // Move all motors to rest position (NOTE: NEGATIVE SIGN)
-    const char *restCmdFmt = "q 0 -%u %u q 1 -%u %u\r";
-    odrv0.println(); // New line for easier debugging
-    odrv1.println(); // New line for easier debugging
-    odrv2.println(); // New line for easier debugging
+#ifdef DEBUG
+    const char *restCmdFmt = "q 0 -%u %u q 1 -%u %u\r\n\r\n\r\n\r\n";
+#else
+    const char *restCmdFmt = "q 0 -%u %u\nq 1 -%u %u\n";
+#endif
 
-    // const char *restCmdFmt = "q 0 -%u %u\nq 1 -%u %u\n";
     /** TODO: investigate using trajectory control for smoother operation */
 
     char restCmd[FRAME_SIZE];
@@ -211,12 +214,12 @@ void SimulatorHub::stopSimulator()
 void SimulatorHub::startSimulator()
 {
     // Move all motors to neutral position
-    const char *zeroCmdFmt = "q 0 0 %u q 1 0 %u\r\n";
-    odrv0.println(); // New line for easier debugging
-    odrv1.println(); // New line for easier debugging
-    odrv2.println(); // New line for easier debugging
+#ifdef DEBUG
+    const char *zeroCmdFmt = "q 0 0 %u q 1 0 %u\r\n\r\n\r\n\r\n";
+#else
+    const char *zeroCmdFmt = "q 0 0 %u\nq 1 0 %u\n";
+#endif
 
-    // const char *zeroCmd = "q 0 0 %u\nq 1 0 %u\n";
     /** TODO: investigate using trajector control for smoother operation */
 
     char zeroCmd[FRAME_SIZE];

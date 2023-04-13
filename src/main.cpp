@@ -12,13 +12,13 @@
  **************
  */
 
+// Uncomment to enable debugging
+// #define DEBUG(x) (odrv0.println(x))
+
 #include <SimulatorHub.h>
 #include <Button.h>
 #include <StatusPin.h>
 #include "config.h"
-
-// #define DEBUG(x) (odrv0.println(x))
-#define DEBUG(x)
 
 SimulatorHub hub(odrv0, odrv1, odrv2);
 Button startButton(START_BUTTON);
@@ -77,33 +77,43 @@ void handleState(HubStates state)
     // Set fast blink rate (don't see this much)
     led.setDelay(100);
     led.setMode(LED_BLINK);
+#ifdef DEBUG
     DEBUG("Starting...");
+#endif
     break;
 
   case RUNNING:
     // Led off during operation
     led.setMode(LED_OFF);
+#ifdef DEBUG
     DEBUG("Running...");
+#endif
     break;
 
   case STOPPED:
     // Set slow blink rate
     led.setDelay(1000);
     led.setMode(LED_BLINK);
+#ifdef DEBUG
     DEBUG("FlyPT stopped");
+#endif
     break;
 
   case READY:
     // Medium blink rate for ready
     led.setDelay(350);
     led.setMode(LED_BLINK);
+#ifdef DEBUG
     DEBUG("Ready for FlyPT");
+#endif
     break;
 
   case IDLE:
     // Led solid on when idle
     led.setMode(LED_ON);
+#ifdef DEBUG
     DEBUG("Idle");
+#endif
     break;
   }
 }
